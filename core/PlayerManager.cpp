@@ -2147,38 +2147,8 @@ bool CPlayer::SetEngineString()
 
 bool CPlayer::SetCSteamID()
 {
-	if (IsFakeClient())
-	{
-		m_SteamId = k_steamIDNil;
-		return true; /* This is the default value. There's a bug-out branch in the caller function. */
-	}
-
-#if SOURCE_ENGINE < SE_ORANGEBOX
-	const char *pAuth = GetAuthString();
-	/* STEAM_0:1:123123 | STEAM_ID_LAN | STEAM_ID_PENDING */
-	if (pAuth && (strlen(pAuth) > 10) && pAuth[8] != '_')
-	{
-		CSteamID sid = CSteamID(atoi(&pAuth[8]) | (atoi(&pAuth[10]) << 1),
-			k_unSteamUserDesktopInstance, k_EUniversePublic, k_EAccountTypeIndividual);
-
-		if (m_SteamId != sid)
-		{
-			m_SteamId = sid;
-			return true;
-		}
-	}
-#else
-	const CSteamID *steamId = engine->GetClientSteamID(m_pEdict);
-	if (steamId)
-	{
-		if (m_SteamId != (*steamId))
-		{
-			m_SteamId = (*steamId);
-			return true;
-		}
-	}
-#endif
-	return false;
+	m_SteamId = k_steamIDNil;
+	return true; /* This is the default value. There's a bug-out branch in the caller function. */
 }
 
 // Ensure a valid AuthString is set before calling.
@@ -2343,14 +2313,7 @@ bool CPlayer::IsAuthorized()
 }
 
 bool CPlayer::IsAuthStringValidated()
-{     
-#if SOURCE_ENGINE >= SE_ORANGEBOX
-	if (!IsFakeClient() && g_Players.m_bAuthstringValidation && !g_HL2.IsLANServer())
-	{
-		return engine->IsClientFullyAuthenticated(m_pEdict);
-	}
-#endif
-
+{
 	return true;
 }
 
